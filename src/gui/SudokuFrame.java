@@ -36,7 +36,10 @@ public class SudokuFrame extends JFrame {
 		this.solver = solver;
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 300, 330);
+		if(SudokuSolver.SUPER_SUDOKU)
+			setBounds(100, 100, 450, 520);
+		else
+			setBounds(100, 100, 300, 330);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);

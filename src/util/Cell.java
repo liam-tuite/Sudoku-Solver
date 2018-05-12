@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import javax.swing.JTextField;
 
+import solver.SudokuSolver;
+
 @SuppressWarnings("serial")
 public class Cell extends JTextField{
 	
@@ -25,8 +27,11 @@ public class Cell extends JTextField{
 	 */
 	public void eliminateValue(char value){
 		
-		if(value != 'X')
-			possibleValues[Integer.parseInt("" + value) - 1] = false;
+		if(value != 'X'){
+			for(int i = 0; i < SudokuSolver.values.length; i++)
+				if(value == SudokuSolver.values[i])
+					possibleValues[i] = false;
+		}
 	}
 	
 	/**
@@ -49,7 +54,7 @@ public class Cell extends JTextField{
 					break;
 				}
 				
-				value = Character.forDigit(i + 1, 10); // this gets the value of i + 1 as a character
+				value = SudokuSolver.values[i];
 			}
 		}
 		setValue(value);
@@ -76,26 +81,22 @@ public class Cell extends JTextField{
 		
 		if(text.length() > 1)
 			throw new ValueLengthException("Entered more than one character in a cell.");
-		
-		switch(text){
-		case "1": {value = '1'; break;}
-		case "2": {value = '2'; break;}
-		case "3": {value = '3'; break;}
-		case "4": {value = '4'; break;}
-		case "5": {value = '5'; break;}
-		case "6": {value = '6'; break;}
-		case "7": {value = '7'; break;}
-		case "8": {value = '8'; break;}
-		case "9": {value = '9'; break;}
-		default: value = 'X';
-		}
+		else if(text.length() == 0)
+			value = 'X';
+		else
+			value = text.charAt(0);
 	}
 	
 	/**
 	 * Sets all possible values to "true".
 	 */
 	public void resetPossibilities(){
-		possibleValues = new boolean[]{true, true, true, true, true, true, true, true, true};
+		
+		if(SudokuSolver.SUPER_SUDOKU)
+			possibleValues = new boolean[]{true, true, true, true, true, true, true, true, true, true, true, true, true,
+					true, true, true};
+		else
+			possibleValues = new boolean[]{true, true, true, true, true, true, true, true, true};
 	}
 	
 	public void setConnectedCells(ArrayList<Cell> connectedCells){
@@ -127,7 +128,7 @@ public class Cell extends JTextField{
 		eliminateValues();
 		for(int i = 0; i < possibleValues.length; i++){
 			if(possibleValues[i]){
-				setValue(Character.forDigit(i + 1, 10));
+				setValue(SudokuSolver.values[i]);
 				break;
 			}
 		}

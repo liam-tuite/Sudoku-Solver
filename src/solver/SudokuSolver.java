@@ -13,16 +13,26 @@ public class SudokuSolver{
 	
 	private static SudokuSolver instance;
 	
+	public final static boolean SUPER_SUDOKU = true; // false if grid is 9x9, true if 16x16
+	
+	public static char[] values;
+	public final static char[] VALUES_STANDARD = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
+	public final static char[] VALUES_SUPER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+	
 	// In debugging mode, the program loads data from the DEBUG_CELLS array and solves for these values
-	private final static boolean DEBUGGING_MODE = false;
-	private final static char[] DEBUG_CELLS = {'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '3', 'X', '8', '5', 'X', 'X', '1', 'X', '2', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '5', 'X', '7', 'X', 'X', 'X', 'X', 'X', '4', 'X', 'X', 'X', '1', 'X', 'X', 'X', '9', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '5', 'X', 'X', 'X', 'X', 'X', 'X', '7', '3', 'X', 'X', '2', 'X', '1', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '4', 'X', 'X', 'X', '9'};
+	private final static boolean DEBUGGING_MODE = true;
+	private final static char[] DEBUG_CELLS = {'C', 'X', 'F', 'X', 'X', '5', '8', 'X', 'B', 'X', 'X', 'X', 'X', 'X', 'X', '6', 'X', 'X', '9', 'X', 'X', 'X', 'A', 'X', 'C', '3', 'X', 'X', '2', 'X', '8', 'X', 'X', 'X', '8', 'X', 'X', 'X', 'X', '4', 'D', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'E', 'X', '6', 'X', 'X', 'X', 'X', '0', 'X', '9', 'X', 'X', 'X', 'D', 'X', 'X', 'X', '4', 'X', '7', 'X', 'A', 'X', 'X', 'E', '1', '0', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '1', 'X', 'X', 'X', 'X', 'X', 'X', 'D', 'X', 'X', 'X', 'X', '9', 'E', 'F', 'D', 'X', 'X', 'X', 'X', '3', 'X', 'X', 'X', '4', '6', 'X', '2', 'X', 'X', '8', '3', 'X', 'F', 'X', 'C', 'X', 'X', 'X', 'X', '9', 'X', 'X', '6', 'X', '4', '9', 'X', '0', 'X', 'X', 'X', '7', 'D', 'X', '2', 'B', 'F', '4', 'X', 'A', 'X', 'X', 'X', 'X', 'X', 'C', 'B', 'X', 'X', 'X', 'X', 'X', '8', 'X', 'X', 'X', 'A', 'X', '1', 'X', 'X', 'X', 'X', 'X', 'F', 'X', '7', 'X', 'X', 'D', 'C', '2', 'X', '3', 'X', 'X', 'X', 'X', 'X', 'X', 'E', 'X', 'X', '5', 'X', 'X', 'X', 'X', '7', '1', 'X', 'X', 'X', '5', '9', '4', 'X', '0', 'B', 'X', 'X', '0', 'X', 'X', '5', 'X', 'X', '9', '6', 'X', '2', 'E', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '3', 'B', '4', 'X', 'X', '8', '7', 'X', 'X', '5', 'E', 'X', '1', 'X', 'X', 'B', 'C', 'X', 'X', 'X', 'E', 'X', 'X', 'F', 'X', '8', 'X', 'X', 'X'};
 
 	public static void main(String[] args){
 		
-		frame = new SudokuFrame(instance);
-		frame.setVisible(true);
+		if(SUPER_SUDOKU)
+			values = VALUES_SUPER;
+		else
+			values = VALUES_STANDARD;
 		
 		instance = new SudokuSolver();
+		frame = new SudokuFrame(instance);
+		frame.setVisible(true);
 		instance.cells = frame.getCells();
 		
 		if(DEBUGGING_MODE){
@@ -77,30 +87,46 @@ public class SudokuSolver{
 	 * @return An ArrayList<Cell> containing references to all Cells connected to this one.
 	 */
 	private ArrayList<Cell> getConnectedCells(Cell cell){
-		
 		ArrayList<Cell> ret = new ArrayList<>();
 		
 		int n = cell.getIndex();
-
-		int r = (n / 9) * 9; // the index of the beginning of this cell's row
-		for(int i = r; i < r + 9; i++){
+		
+		int sqrt;
+		if(SUPER_SUDOKU){
+			sqrt = 4;
+		}
+		else{
+			sqrt = 3;
+		}
+		int sqrtPow2 = (int) Math.pow(sqrt, 2);
+		int sqrtPow3 = (int) Math.pow(sqrt, 3);
+		int sqrtPow4 = (int) Math.pow(sqrt, 4);
+		
+		int r = (n / sqrtPow2) * sqrtPow2; // the index of the beginning of this cell's row
+		for(int i = r; i < r + sqrtPow2; i++){
 			if(!ret.contains(cells[i])){
 				ret.add(cells[i]);
 			}
 		}
 		
-		int c = n % 9; // the index of the beginning of this cell's column
-		for(int i = c; i < 81; i += 9){
+		int c = n % sqrtPow2; // the index of the beginning of this cell's column
+		for(int i = c; i < sqrtPow4; i += sqrtPow2){
 			if(!ret.contains(cells[i])){
 				ret.add(cells[i]);
 			}
 		}
 		
-		int dx = c - (c / 3) * 3; // the difference cell's index and the beginning of its box along the x axis
-		int dy = r - (r / 27) * 27; // the difference cell's index and the beginning of its box along the y axis
+		int dx = c - (c / sqrt) * sqrt; // the difference cell's index and the beginning of its box along the x axis
+		int dy = r - (r / sqrtPow3) * sqrtPow3; // the difference cell's index and the beginning of its box along the y axis
 		int s = n - dx - dy; // the index of the beginning of this cell's box
 		
-		int[] boxIndices = {s, s + 1, s + 2, s + 9, s + 10, s + 11, s + 18, s + 19, s + 20};
+		int[] boxIndices;
+		if(SUPER_SUDOKU)
+			boxIndices = new int[]{s, s + 1, s + 2, s + 3, s + 16, s + 17, s + 18, s + 19, s + 32, s + 33, s + 34, s + 35,
+					s + 48, s + 49, s + 50, s + 51};
+		else
+			boxIndices = new int[]{s, s + 1, s + 2, s + 9, s + 10, s + 11, s + 18, s + 19, s + 20};
+
 		for(int i : boxIndices){
 			if(!ret.contains(cells[i])){
 				ret.add(cells[i]);

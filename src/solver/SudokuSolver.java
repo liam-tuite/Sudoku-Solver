@@ -8,20 +8,20 @@ import util.Cell;
 
 public class SudokuSolver{
 	
+	private ArrayList<Cell> solvedCells, unsolvedCells;
 	private Cell[] cells;
-	private static SudokuFrame frame;
-	
-	private static SudokuSolver instance;
-	
-	public final static boolean SUPER_SUDOKU = true; // false if grid is 9x9, true if 16x16
-	
-	public static char[] values;
-	public final static char[] VALUES_STANDARD = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
-	public final static char[] VALUES_SUPER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-	
+	private Cell[][] columns, rows, blocks;
+
 	// In debugging mode, the program loads data from the DEBUG_CELLS array and solves for these values
 	private final static boolean DEBUGGING_MODE = true;
-	private final static char[] DEBUG_CELLS = {'C', 'X', 'F', 'X', 'X', '5', '8', 'X', 'B', 'X', 'X', 'X', 'X', 'X', 'X', '6', 'X', 'X', '9', 'X', 'X', 'X', 'A', 'X', 'C', '3', 'X', 'X', '2', 'X', '8', 'X', 'X', 'X', '8', 'X', 'X', 'X', 'X', '4', 'D', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'E', 'X', '6', 'X', 'X', 'X', 'X', '0', 'X', '9', 'X', 'X', 'X', 'D', 'X', 'X', 'X', '4', 'X', '7', 'X', 'A', 'X', 'X', 'E', '1', '0', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '1', 'X', 'X', 'X', 'X', 'X', 'X', 'D', 'X', 'X', 'X', 'X', '9', 'E', 'F', 'D', 'X', 'X', 'X', 'X', '3', 'X', 'X', 'X', '4', '6', 'X', '2', 'X', 'X', '8', '3', 'X', 'F', 'X', 'C', 'X', 'X', 'X', 'X', '9', 'X', 'X', '6', 'X', '4', '9', 'X', '0', 'X', 'X', 'X', '7', 'D', 'X', '2', 'B', 'F', '4', 'X', 'A', 'X', 'X', 'X', 'X', 'X', 'C', 'B', 'X', 'X', 'X', 'X', 'X', '8', 'X', 'X', 'X', 'A', 'X', '1', 'X', 'X', 'X', 'X', 'X', 'F', 'X', '7', 'X', 'X', 'D', 'C', '2', 'X', '3', 'X', 'X', 'X', 'X', 'X', 'X', 'E', 'X', 'X', '5', 'X', 'X', 'X', 'X', '7', '1', 'X', 'X', 'X', '5', '9', '4', 'X', '0', 'B', 'X', 'X', '0', 'X', 'X', '5', 'X', 'X', '9', '6', 'X', '2', 'E', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '3', 'B', '4', 'X', 'X', '8', '7', 'X', 'X', '5', 'E', 'X', '1', 'X', 'X', 'B', 'C', 'X', 'X', 'X', 'E', 'X', 'X', 'F', 'X', '8', 'X', 'X', 'X'};
+	private final static char[] DEBUG_CELLS = {'X', 'X', 'X', '3', '8', 'X', 'X', '7', '6', 'X', '0', '5', 'A', 'F', '1', 'X', 'X', '6', 'X', '4', 'C', 'A', 'X', '5', '9', 'B', 'X', '2', 'D', 'X', 'X', 'X', '1', '9', '0', 'E', 'D', 'B', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '6', 'X', '5', 'X', 'X', 'X', '4', '2', 'X', '3', 'X', 'X', 'X', 'X', 'X', '0', 'X', 'X', 'X', 'X', 'X', '3', '9', 'X', 'X', 'X', '7', 'X', 'X', 'X', 'C', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'F', 'X', 'X', 'X', '4', 'E', '0', '7', 'F', 'X', '0', 'X', 'X', 'X', 'X', 'A', 'C', 'X', 'X', 'X', 'X', 'X', '5', 'X', 'X', '6', 'X', 'X', '7', 'X', 'X', 'X', '9', 'X', 'X', 'X', 'X', 'X', 'X', '3', 'X', 'X', 'D', 'X', 'X', 'X', 'X', '5', '6', 'X', 'X', 'X', 'X', 'A', '1', 'E', 'X', 'X', 'F', '7', 'X', '1', 'A', 'D', '8', 'X', 'X', 'X', '0', '9', 'B', '5', 'X', 'X', 'X', 'X', '6', '4', '2', 'X', '0', 'C', 'X', 'X', '3', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '4', 'X', '5', 'X', 'X', 'X', 'A', 'X', '5', '8', '7', '9', 'X', 'X', 'X', '4', '0', 'X', 'X', 'X', 'B', 'X', 'X', '5', 'X', 'X', 'C', 'X', 'F', 'X', 'X', '1', '2', 'E', 'X', 'D', 'X', 'X', '7', 'C', 'X', 'X', 'A', 'X', 'X', 'X', 'X', '9', 'X', '1', 'F', '8', 'D', '2', 'X', '6', 'X', '3', 'E', 'F', '0', '5', 'X', 'X', 'B', 'A', 'X', 'X'};
+	private static SudokuFrame frame;
+	private static SudokuSolver instance;
+	
+	public static char[] values;	
+	public final static boolean SUPER_SUDOKU = true; // false if grid is 9x9, true if 16x16
+	public final static char[] VALUES_STANDARD = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
+	public final static char[] VALUES_SUPER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
 	public static void main(String[] args){
 		
@@ -50,47 +50,117 @@ public class SudokuSolver{
 	public void solvePuzzle(){
 		
 		// prepare the information on the grid
-		initCellIndices();
+		initGridConnections();
 		initCellConnections();
-		ArrayList<Cell> unsolvedCells = getUnsolvedCells();
-
+		
+		partitionCells();
+		int unsolvedCellCount = unsolvedCells.size();
 		boolean finished = false;
+
 		while(!finished){
 			
-			finished = true;
-			
-			// While there are still Cells to solve
-			for(Iterator<Cell> iterator = unsolvedCells.iterator(); iterator.hasNext();){
-				
-				Cell cell = iterator.next();
-				cell.eliminateValues(); // attempt to get definite solution for this Cell using elimination
-				
-				if(cell.getValue() != 'X'){ // if solution was found
-					
-					iterator.remove(); // remove this Cell from unsolvedCells
-					finished = unsolvedCells.size() == 0; // if there are unsolved cells still, we will iterate the loop least one more time
-				}
-			}
+			eliminateSimple();
+			if(unsolvedCellCount != unsolvedCells.size())
+				unsolvedCellCount = unsolvedCells.size();
+			else
+				finished = true;
 		}
 		
 		// If there are still unsolved cells, use brute force
-		if(!unsolvedCells.isEmpty()){ // if there are still cells to solve after simple elimination
+		if(!unsolvedCells.isEmpty()) // if there are still cells to solve after simple elimination
 			solveBruteForce(unsolvedCells);
+	}
+	
+	private void eliminateSimple(){
+		
+		eliminateSoleCandidate();
+		eliminateUniqueCandidate();
+	}
+
+	private void eliminateSoleCandidate(){
+			
+		// first, eliminate from each Cell the possibility of the value of any known Cell it is connected to
+		for(Cell solvedCell : solvedCells){
+			
+			ArrayList<Cell> connectedCells = solvedCell.getConnectedCells();
+			
+			for(Cell connection : connectedCells)
+				connection.eliminateValue(solvedCell.getValue());
+		}
+		
+		// for each unsolved Cell
+		for(Iterator<Cell> iterator = unsolvedCells.iterator(); iterator.hasNext();){
+			
+			Cell cell = iterator.next();
+			cell.takeLastValue(); // This Cell takes the single remaining possible value, or remains unchanged 
+			
+			if(cell.getValue() != 'X') // if solution was found
+				iterator.remove(); // remove this Cell from unsolvedCells
 		}
 	}
 	
-	/**
-	 * Returns an ArrayList<Cell> that contains references to all cells that are connected to the argument Cell (i.e.
-	 * Cells in the same row, the same column and the same square).
-	 * 
-	 * @param cell The Cell for which we are finding the connections.
-	 * @return An ArrayList<Cell> containing references to all Cells connected to this one.
-	 */
-	private ArrayList<Cell> getConnectedCells(Cell cell){
-		ArrayList<Cell> ret = new ArrayList<>();
+	private void eliminateUniqueCandidate(){
 		
-		int n = cell.getIndex();
+		eliminateUniqueCandidate(columns);
+		eliminateUniqueCandidate(rows);
+		eliminateUniqueCandidate(blocks);
+	}
+	
+	private void eliminateUniqueCandidate(Cell[][] container){
 		
+		for(Cell[] cells : container){
+			
+			// keep track of the number of Cells that could contain a certain value
+			int[] totals = new int[values.length];
+			for(Cell cell : cells){
+				
+				if(cell.getValue() == 'X'){
+					boolean[] possibleValues = cell.getPossibleValues();
+					for(int i = 0; i < possibleValues.length; i++)
+						if(possibleValues[i])
+							totals[i]++;
+				}
+			}
+			
+			// if any of the possible values can only be in one Cell, set that Cell's value to the possible value
+			for(int i = 0; i < totals.length; i++){
+				if(totals[i] == 1)
+					// look for the Cell with the corresponding possible value and set it
+					for(Cell cell : cells){
+						if(cell.getValue() == 'X'){
+							if(cell.getPossibleValues()[i]){
+								cell.setValue(values[i]);
+								
+								unsolvedCells.remove(cell);
+								break;
+							}
+						}
+					}
+			}
+		}
+	}
+	
+	private void initCellConnections(){
+
+		for(Cell cell : cells){
+			ArrayList<Cell> connections = new ArrayList<>();
+
+			for(Cell c : columns[cell.getColIndex()])
+				if(!c.equals(cell))
+					connections.add(c);
+			for(Cell c : rows[cell.getRowIndex()])
+				if(!c.equals(cell))
+					connections.add(c);
+			for(Cell c : blocks[cell.getBlockIndex()])
+				if(!c.equals(cell))
+					connections.add(c);
+			
+			cell.setConnectedCells(connections);
+		}
+	}
+	
+	private void initGridConnections(){
+
 		int sqrt;
 		if(SUPER_SUDOKU){
 			sqrt = 4;
@@ -99,75 +169,35 @@ public class SudokuSolver{
 			sqrt = 3;
 		}
 		int sqrtPow2 = (int) Math.pow(sqrt, 2);
-		int sqrtPow3 = (int) Math.pow(sqrt, 3);
-		int sqrtPow4 = (int) Math.pow(sqrt, 4);
 		
-		int r = (n / sqrtPow2) * sqrtPow2; // the index of the beginning of this cell's row
-		for(int i = r; i < r + sqrtPow2; i++){
-			if(!ret.contains(cells[i])){
-				ret.add(cells[i]);
-			}
+		columns = new Cell[sqrtPow2][sqrtPow2];
+		rows = new Cell[sqrtPow2][sqrtPow2];
+		blocks = new Cell[sqrtPow2][sqrtPow2];
+		
+		for(int i = 0; i < cells.length; i++){
+			
+			int colIndex = i % sqrtPow2;
+			int rowIndex = i / sqrtPow2;
+			int blockIndex = (rowIndex / sqrt) * sqrt + (colIndex / sqrt);
+			
+			cells[i].setIndices(i, colIndex, rowIndex, blockIndex);
+			
+			columns[colIndex][rowIndex] = cells[i];
+			rows[rowIndex][colIndex] = cells[i];
+			blocks[blockIndex][colIndex % sqrt + (rowIndex % sqrt * sqrt)] = cells[i];
 		}
-		
-		int c = n % sqrtPow2; // the index of the beginning of this cell's column
-		for(int i = c; i < sqrtPow4; i += sqrtPow2){
-			if(!ret.contains(cells[i])){
-				ret.add(cells[i]);
-			}
-		}
-		
-		int dx = c - (c / sqrt) * sqrt; // the difference cell's index and the beginning of its box along the x axis
-		int dy = r - (r / sqrtPow3) * sqrtPow3; // the difference cell's index and the beginning of its box along the y axis
-		int s = n - dx - dy; // the index of the beginning of this cell's box
-		
-		int[] boxIndices;
-		if(SUPER_SUDOKU)
-			boxIndices = new int[]{s, s + 1, s + 2, s + 3, s + 16, s + 17, s + 18, s + 19, s + 32, s + 33, s + 34, s + 35,
-					s + 48, s + 49, s + 50, s + 51};
-		else
-			boxIndices = new int[]{s, s + 1, s + 2, s + 9, s + 10, s + 11, s + 18, s + 19, s + 20};
-
-		for(int i : boxIndices){
-			if(!ret.contains(cells[i])){
-				ret.add(cells[i]);
-			}
-		}
-		
-		return ret;
 	}
 	
-	/**
-	 * Gets an ArrayList<Cell> containing references to all of the Cells in the grid for which the Cell value is unknown.
-	 * 
-	 * @return An ArrayList<Cell> containing references to all unknown Cells.
-	 */
-	private ArrayList<Cell> getUnsolvedCells(){
-
-		ArrayList<Cell> unsolvedCells = new ArrayList<>();
+	private void partitionCells(){
 		
-		for(Cell cell : cells)			
-			if(cell.getValue() == 'X' && !unsolvedCells.contains(cell))
-				unsolvedCells.add(cell);
+		solvedCells = new ArrayList<>();
+		unsolvedCells = new ArrayList<>();
 		
-		return unsolvedCells;
-	}
-	
-	/**
-	 * Sets the initial value of the connectedCells member for all Cell objects.
-	 */
-	private void initCellConnections(){
-		
-		for(Cell cell : cells)
-			cell.setConnectedCells(getConnectedCells(cell));
-	}
-	
-	/**
-	 * Initialise each Cell's index value.
-	 */
-	private void initCellIndices(){
-		
-		for(int i = 0; i < cells.length; i++)
-			cells[i].setIndex(i);
+		for(Cell c : cells)
+			if(c.getValue() == 'X')
+				unsolvedCells.add(c);
+			else
+				solvedCells.add(c);
 	}
 	
 	/**

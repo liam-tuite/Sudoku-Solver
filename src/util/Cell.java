@@ -11,13 +11,14 @@ public class Cell extends JTextField{
 	
 	private boolean[] possibleValues;
 	private char value;
-	private int index;
+	private int gridIndex, rowIndex, colIndex, blockIndex;
 	
 	private ArrayList<Cell> connectedCells;
 	private Cell previousUncertain;
 	
 	public Cell(){
 		resetPossibilities(); // initialise all possibilities as true (they will be falsified later)
+		connectedCells = new ArrayList<>();
 	}
 	
 	/**
@@ -27,45 +28,38 @@ public class Cell extends JTextField{
 	 */
 	public void eliminateValue(char value){
 		
-		if(value != 'X'){
+		if(value != 'X')
 			for(int i = 0; i < SudokuSolver.values.length; i++)
 				if(value == SudokuSolver.values[i])
 					possibleValues[i] = false;
-		}
 	}
 	
-	/**
-	 * Looks through all connected Cells and eliminates possible values that are already entered in one or more of these
-	 * Cells.
-	 */
-	public void eliminateValues(){
-		
-		for(Cell c : connectedCells)
-			eliminateValue(c.value);
-		
-		int count = 0; // count all of the possible values remaining
-		for(int i = 0; i < possibleValues.length; i++){
-			
-			if(possibleValues[i]){
-				
-				count++;
-				if(count > 1){
-					value = 'X';
-					break;
-				}
-				
-				value = SudokuSolver.values[i];
-			}
-		}
-		setValue(value);
+	public ArrayList<Cell> getConnectedCells(){
+		return this.connectedCells;
 	}
 	
-	public int getIndex(){
-		return this.index;
+	public int getColIndex(){
+		return this.colIndex;
+	}
+	
+	public int getGridIndex(){
+		return this.gridIndex;
+	}
+	
+	public boolean[] getPossibleValues(){
+		return this.possibleValues;
 	}
 	
 	public Cell getPreviousUncertain(){
 		return previousUncertain;
+	}
+	
+	public int getRowIndex(){
+		return this.rowIndex;
+	}
+	
+	public int getBlockIndex(){
+		return this.blockIndex;
 	}
 	
 	public char getValue(){
@@ -103,8 +97,12 @@ public class Cell extends JTextField{
 		this.connectedCells = connectedCells;
 	}
 	
-	public void setIndex(int index){
-		this.index = index;
+	public void setIndices(int gridIndex, int colIndex, int rowIndex, int blockIndex){
+		
+		this.gridIndex = gridIndex;
+		this.colIndex = colIndex;
+		this.rowIndex = rowIndex;
+		this.blockIndex = blockIndex;
 	}
 	
 	public void setPreviousUncertain(Cell previousUncertain){
@@ -116,8 +114,11 @@ public class Cell extends JTextField{
 		this.value = value;
 		if(value == 'X')
 			setText("");
-		else
+		else{
 			setText("" + value);
+			for(Cell c : connectedCells)
+				c.eliminateValue(value);
+		}
 	}
 	
 	/**
@@ -132,5 +133,30 @@ public class Cell extends JTextField{
 				break;
 			}
 		}
+	}
+	
+	public void takeLastValue(){
+
+		int count = 0; // count all of the possible values remaining
+		for(int i = 0; i < possibleValues.length; i++){
+			
+			if(possibleValues[i]){
+				
+				count++;
+				if(count > 1){
+					value = 'X';
+					break;
+				}
+				
+				value = SudokuSolver.values[i];
+			}
+		}
+		setValue(value);
+	}
+	
+	private void eliminateValues(){
+
+		for(Cell c : connectedCells)
+			eliminateValue(c.value);
 	}
 }

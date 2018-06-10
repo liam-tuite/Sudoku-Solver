@@ -13,8 +13,8 @@ public class SudokuSolver{
 	private Cell[][] columns, rows, blocks;
 
 	// In debugging mode, the program loads data from the DEBUG_CELLS array and solves for these values
-	private final static boolean DEBUGGING_MODE = true;
-	private final static char[] DEBUG_CELLS = {'X', 'X', 'X', '3', '8', 'X', 'X', '7', '6', 'X', '0', '5', 'A', 'F', '1', 'X', 'X', '6', 'X', '4', 'C', 'A', 'X', '5', '9', 'B', 'X', '2', 'D', 'X', 'X', 'X', '1', '9', '0', 'E', 'D', 'B', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '6', 'X', '5', 'X', 'X', 'X', '4', '2', 'X', '3', 'X', 'X', 'X', 'X', 'X', '0', 'X', 'X', 'X', 'X', 'X', '3', '9', 'X', 'X', 'X', '7', 'X', 'X', 'X', 'C', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'F', 'X', 'X', 'X', '4', 'E', '0', '7', 'F', 'X', '0', 'X', 'X', 'X', 'X', 'A', 'C', 'X', 'X', 'X', 'X', 'X', '5', 'X', 'X', '6', 'X', 'X', '7', 'X', 'X', 'X', '9', 'X', 'X', 'X', 'X', 'X', 'X', '3', 'X', 'X', 'D', 'X', 'X', 'X', 'X', '5', '6', 'X', 'X', 'X', 'X', 'A', '1', 'E', 'X', 'X', 'F', '7', 'X', '1', 'A', 'D', '8', 'X', 'X', 'X', '0', '9', 'B', '5', 'X', 'X', 'X', 'X', '6', '4', '2', 'X', '0', 'C', 'X', 'X', '3', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '4', 'X', '5', 'X', 'X', 'X', 'A', 'X', '5', '8', '7', '9', 'X', 'X', 'X', '4', '0', 'X', 'X', 'X', 'B', 'X', 'X', '5', 'X', 'X', 'C', 'X', 'F', 'X', 'X', '1', '2', 'E', 'X', 'D', 'X', 'X', '7', 'C', 'X', 'X', 'A', 'X', 'X', 'X', 'X', '9', 'X', '1', 'F', '8', 'D', '2', 'X', '6', 'X', '3', 'E', 'F', '0', '5', 'X', 'X', 'B', 'A', 'X', 'X'};
+	private final static boolean DEBUGGING_MODE = false;
+	private final static char[] DEBUG_CELLS = {'X', 'X', '1', 'X', 'C', 'D', 'E', 'A', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'C', 'X', 'D', 'X', '9', 'F', 'X', '0', 'B', '8', 'X', '3', 'X', 'X', 'X', 'E', '0', 'X', 'B', 'X', 'X', '7', 'X', 'X', '6', 'X', '2', 'A', 'X', '9', 'X', 'X', 'X', 'X', 'X', 'X', 'B', 'X', 'X', '3', 'X', 'E', 'F', '8', '1', 'C', '2', 'X', '1', '7', '0', 'X', 'F', 'A', '2', 'E', '5', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'E', 'X', 'X', '4', '8', 'X', 'X', '9', 'F', 'X', 'X', '2', 'X', 'B', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'A', 'X', 'D', 'A', 'X', 'X', 'X', '0', 'X', 'X', 'X', 'X', '2', 'X', 'D', 'C', 'B', 'X', '1', 'B', '3', '5', 'C', '7', 'X', '6', 'X', 'X', 'F', '4', '1', 'X', 'X', 'A', 'X', 'X', 'X', 'X', 'X', '4', 'X', 'D', 'X', 'X', '9', '7', 'B', 'X', 'X', 'X', '5', 'X', 'X', 'X', 'X', 'B', '8', 'X', 'X', 'X', 'X', 'X', '3', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '8', 'F', '2', '1', 'X', 'X', 'X', 'C', 'E', 'B', '9', 'D', 'X', 'X', 'X', 'X', '9', '3', '1', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '8', 'X', 'X', 'D', 'X', 'X', '3', '5', 'C', 'X', '4', 'X', '1', 'X', 'X', '2', '0', 'B', 'X', 'X', 'X', 'X', '1', 'X', 'X', '8', 'X', 'X', 'X', 'X', 'X', 'X', 'C', 'X', '6', 'X', 'F', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', '1', 'X', '3', 'X'};
 	private static SudokuFrame frame;
 	private static SudokuSolver instance;
 	
@@ -60,8 +60,10 @@ public class SudokuSolver{
 		while(!finished){
 			
 			eliminateSimple();
-			if(unsolvedCellCount != unsolvedCells.size())
-				unsolvedCellCount = unsolvedCells.size();
+			
+			int newCount = unsolvedCells.size();
+			if(newCount == 0 || newCount != unsolvedCellCount)
+				unsolvedCellCount = newCount;
 			else
 				finished = true;
 		}
@@ -71,12 +73,18 @@ public class SudokuSolver{
 			solveBruteForce(unsolvedCells);
 	}
 	
+	/**
+	 * Calls the simple elimination techniques. The more advanced techniques have yet to be implemented.
+	 */
 	private void eliminateSimple(){
 		
 		eliminateSoleCandidate();
 		eliminateUniqueCandidate();
 	}
 
+	/**
+	 * Checks each Cell for a 'sole candidate' - a single possible value that the Cell must have.
+	 */
 	private void eliminateSoleCandidate(){
 			
 		// first, eliminate from each Cell the possibility of the value of any known Cell it is connected to
@@ -99,6 +107,9 @@ public class SudokuSolver{
 		}
 	}
 	
+	/**
+	 * Performs 'unique candidate' elimination on each set of containers.
+	 */
 	private void eliminateUniqueCandidate(){
 		
 		eliminateUniqueCandidate(columns);
@@ -106,13 +117,19 @@ public class SudokuSolver{
 		eliminateUniqueCandidate(blocks);
 	}
 	
-	private void eliminateUniqueCandidate(Cell[][] container){
+	/**
+	 * This method checks a group of 'containers' (which are either columns, rows or blocks) for any values that have only
+	 * one potential Cell within a container.
+	 * 
+	 * @param containers The group of containers (i.e. columns, rows or blocks) that we are checking.
+	 */
+	private void eliminateUniqueCandidate(Cell[][] containers){
 		
-		for(Cell[] cells : container){
+		for(Cell[] container : containers){
 			
 			// keep track of the number of Cells that could contain a certain value
 			int[] totals = new int[values.length];
-			for(Cell cell : cells){
+			for(Cell cell : container)
 				
 				if(cell.getValue() == 'X'){
 					boolean[] possibleValues = cell.getPossibleValues();
@@ -120,45 +137,47 @@ public class SudokuSolver{
 						if(possibleValues[i])
 							totals[i]++;
 				}
-			}
 			
 			// if any of the possible values can only be in one Cell, set that Cell's value to the possible value
-			for(int i = 0; i < totals.length; i++){
+			for(int i = 0; i < totals.length; i++)
 				if(totals[i] == 1)
 					// look for the Cell with the corresponding possible value and set it
-					for(Cell cell : cells){
-						if(cell.getValue() == 'X'){
+					for(Cell cell : container)
+						if(cell.getValue() == 'X')
 							if(cell.getPossibleValues()[i]){
 								cell.setValue(values[i]);
 								
 								unsolvedCells.remove(cell);
 								break;
 							}
-						}
-					}
-			}
 		}
 	}
 	
+	/**
+	 * Initialises the connected Cells of each Cell in the grid.
+	 */
 	private void initCellConnections(){
 
 		for(Cell cell : cells){
 			ArrayList<Cell> connections = new ArrayList<>();
 
 			for(Cell c : columns[cell.getColIndex()])
-				if(!c.equals(cell))
+				if(!connections.contains(c) && !c.equals(cell))
 					connections.add(c);
 			for(Cell c : rows[cell.getRowIndex()])
-				if(!c.equals(cell))
+				if(!connections.contains(c) && !c.equals(cell))
 					connections.add(c);
 			for(Cell c : blocks[cell.getBlockIndex()])
-				if(!c.equals(cell))
+				if(!connections.contains(c) && !c.equals(cell))
 					connections.add(c);
 			
 			cell.setConnectedCells(connections);
 		}
 	}
 	
+	/**
+	 * Initialises the columns, rows and blocks matrices.
+	 */
 	private void initGridConnections(){
 
 		int sqrt;
@@ -188,6 +207,9 @@ public class SudokuSolver{
 		}
 	}
 	
+	/**
+	 * Partitions the Cells into the two ArrayLists solvedCells and unsolvedCells.
+	 */
 	private void partitionCells(){
 		
 		solvedCells = new ArrayList<>();
@@ -236,6 +258,7 @@ public class SudokuSolver{
 				previousUncertain.setValue('X');
 				
 				previousUncertain = previousUncertain.getPreviousUncertain();
+				
 				i -= 2;
 				continue;
 			}

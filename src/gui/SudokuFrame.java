@@ -18,12 +18,11 @@ import java.awt.event.ActionEvent;
 public class SudokuFrame extends JFrame {
 	
 	private JButton solve_button, printData_button;
-	private JPanel contentPane;
+	private JPanel buttonPanel, contentPane;
 	private CellGridPanel cellGridPanel;
 
 	private Cell[] cells;
 	private SudokuSolver solver;
-	private JPanel buttonPanel;
 	
 	/**
 	 * Create the frame.

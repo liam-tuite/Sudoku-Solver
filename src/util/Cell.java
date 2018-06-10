@@ -109,32 +109,32 @@ public class Cell extends JTextField{
 		this.previousUncertain = previousUncertain;
 	}
 	
+	/**
+	 * Sets the Cell's value. This value is certain, so the connectedCells will be updated accordingly.
+	 * 
+	 * @param value The new value of the Cell.
+	 */
 	public void setValue(char value){
-		
-		this.value = value;
-		if(value == 'X')
-			setText("");
-		else{
-			setText("" + value);
-			for(Cell c : connectedCells)
-				c.eliminateValue(value);
-		}
+		setValue(value, false);
 	}
 	
 	/**
-	 * Sets the value of this Cell to the first possible value.
+	 * Sets the value of this Cell to the first possible value. This is only used in brute force solving, so the value being taken is marked as 'uncertain'.
 	 */
 	public void takeFirstValue(){
 	
 		eliminateValues();
 		for(int i = 0; i < possibleValues.length; i++){
 			if(possibleValues[i]){
-				setValue(SudokuSolver.values[i]);
+				setValue(SudokuSolver.values[i], true);
 				break;
 			}
 		}
 	}
 	
+	/**
+	 * Sets the Cell's value to the only remaining possible value, or 'X' if there is more than one possibility.
+	 */
 	public void takeLastValue(){
 
 		int count = 0; // count all of the possible values remaining
@@ -154,9 +154,32 @@ public class Cell extends JTextField{
 		setValue(value);
 	}
 	
+	/**
+	 * Calls the eliminateValue method on each connected Cell.
+	 */
 	private void eliminateValues(){
 
 		for(Cell c : connectedCells)
 			eliminateValue(c.value);
+	}
+	
+	/**
+	 * Sets this Cell's value, and updates the text of the Cell accordingly. If this wasn't called during the brute force stage, then all connectedCells
+	 * are updated to exclude the possibility of this Cell's new value.
+	 * 
+	 * @param value The value to be given to this Cell.
+	 * @param uncertain Whether we are certain about this value (uncertain is true if this was called during the brute force stage, and false otherwise).
+	 */
+	private void setValue(char value, boolean uncertain){
+		
+		this.value = value;
+		if(value == 'X')
+			setText("");
+		else{
+			setText("" + value);
+			if(!uncertain)
+				for(Cell c : connectedCells)
+					c.eliminateValue(value);
+		}
 	}
 }
